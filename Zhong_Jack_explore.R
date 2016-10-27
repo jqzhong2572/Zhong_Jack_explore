@@ -57,6 +57,7 @@ pearson_corr <- function(data, threshold = 0) {
      # lower triangular matrix gets rid of dupilicates and 1's on the diagonal
   newdf <- data.frame(pairs, correlation) # create a new data frame with our pairs
   newdf <- subset(newdf, correlation > threshold) # apply the threshold
+  colnames(newdf) <- c("Variable Pairs", "Pearson Exceeds Threshold")
   return(newdf)
 }
 
