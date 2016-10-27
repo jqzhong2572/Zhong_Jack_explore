@@ -12,16 +12,19 @@ explore <- function(data, plotswitch = "off", threshold = 0, bins = NULL) {
 }
 
 freq_table <- function(data) {
+  # this function gives a frequency table for categorical and logical variable
   Cat_Or_Log <- c(data[sapply(data, is.factor)], data[sapply(data, is.logical)])
   return (lapply(Cat_Or_Log, table))
 }
 
 num_summary <- function(data) {
+  # this function gives a summary for numerical variable
   Num <- data[sapply(data, is.numeric)]
   return (summary(Num))
 }
 
 r_squared <- function(data) {
+  # this function calculate r-sqaure value and returns dataframe
   data <- data[sapply(data, is.numeric)] # only the numeric
   colname <- colnames(data) # extract column names
   pairwise_names <- c() # initiate pair of variables
@@ -43,6 +46,7 @@ r_squared <- function(data) {
   
 
 pearson_corr <- function(data, threshold = 0) {
+  # this function caculate corr and returns a dataframe
   Num <- data[sapply(data, is.numeric)] # creates a variable that only has the numeric
   b <- combn(colnames(Num), 2) # finds all combinations of the name pairs
   pairs <- paste(b[1,], b[2, ], sep = "-") 
@@ -78,7 +82,8 @@ plotsNum <- function(data, plotswitch, bins=NULL) {
        }
     }
     else if (plotswitch == "grid") {
-        
+
+              
     }
     else {
     }
@@ -88,10 +93,12 @@ plotsNum <- function(data, plotswitch, bins=NULL) {
 
 plots_cat_or_bi <- function(data, plotswitch = "off") {
   Cat_Or_Bi <- data[,sapply(data,is.factor)|sapply(data,is.logical)]
+    # pick out categorical and binary columns
   if(plotswitch=="on"|plotswitch=="grid"){
     for(i in 1:ncol(Cat_Or_Bi)){
       p <- ggplot(Cat_Or_Bi,aes(x=data[,i]),colour="gray")+
         geom_bar()+ xlab(colnames(Cat_Or_Bi[i]))
+      # for each column, print a bar plot
       print(p)
     }
   }
