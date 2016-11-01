@@ -1,3 +1,7 @@
+# Jack Zhong
+# Nov. 2016 
+
+
 library(ggplot2)
 library(grid)
 
