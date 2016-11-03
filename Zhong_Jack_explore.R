@@ -221,12 +221,15 @@ is.binary <- function(v) {
 }
 
 plots_cat_or_bi <- function(data, plotswitch = "off") {
-  Cat_Or_Bi <- data[,sapply(data,is.factor)|sapply(data,is.binary)]
-    # pick out categorical and binary columns
+  data1 <- data[,sapply(data,is.factor)]
+  data2 <- data[,sapply(data,is.logical)]
+  data3 <- data[,sapply(data,is.binary)]
+  Cat_Or_Bi <- data.frame(data1,data2,data3)
+  # pick out categorical and binary columns
   if(plotswitch=="on"|plotswitch=="grid"){
     for(i in 1:ncol(Cat_Or_Bi)){
-      p <- ggplot(Cat_Or_Bi,aes(x=data[,i]),colour="gray")+
-        geom_bar()+ xlab(colnames(Cat_Or_Bi[i]))
+      p <- ggplot(Cat_Or_Bi,aes(x=data[,i]))+
+        geom_bar(fill='gray')+ xlab(colnames(Cat_Or_Bi[i]))
       # for each column, print a bar plot
       print(p)
     }
