@@ -4,32 +4,7 @@
 
 library(ggplot2)
 library(grid)
-
-explore <- function(data, plotswitch = "off", threshold = 0, bins = NULL) {
-  # this is the main function
-  # execute the subfunctions first 
-  # parameters: 
-  #   a dataframe, a string indicating plotswitch
-  #   number between 0 to 1 as threshhold, number of binsize
-  # return:
-  #   frequency table for categorical and logical variable
-  #   summary for numerical variable
-  #   r-sqaure value for numerical variables and returns dataframe
-  #   caculate corr between numerical variables and returns a dataframe
-  # 2 plots with required elements
-
-  freq_table <- freq_table (data)
-  num_summary <- num_summary (data)
-  r_squared <- r_squared (data)
-  pearson_corr <- pearson_corr (data, threshold)
-  plotsBlue <- plotsNum (data, plotswitch, bins)
-  plotsGray <- plots_cat_or_bi (data, plotswitch)
-  
-  return (list(freq_table, num_summary, r_squared, pearson_corr, plotsBlue, plotsGray))
-  
-}
-
-
+# run the subfunctions first
 
 #1-------------------------------------------------------------------------
 freq_table <- function(data) {
@@ -170,7 +145,8 @@ plotsNum <- function(data,plotswitch='off',bins=NULL){
           title <- paste(colnames(num[i]),bins[j],sep=" bin=")
           grid.text(title, vp = viewport(layout.pos.row = 1, layout.pos.col = 1:2))
           print(p1, vp = viewport(layout.pos.row = 2, layout.pos.col = 1))
-          print(p2, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))#print p1 and p2 two histograms
+          print(p2, vp = viewport(layout.pos.row = 2, layout.pos.col = 2))
+          # print p1 and p2 histograms in pairs
           
         }
       }
@@ -258,3 +234,33 @@ plots_cat_or_bi <- function(data, plotswitch = "off") {
 }
 
 
+
+explore <- function(data, plotswitch = "off", threshold = 0, bins = NULL) {
+  # this is the main function
+  # execute the subfunctions first 
+  # parameters: 
+  #   a dataframe, a string indicating plotswitch
+  #   number between 0 to 1 as threshhold, number of binsize
+  # return:
+  #   frequency table for categorical and logical variable
+  #   summary for numerical variable
+  #   r-sqaure value for numerical variables and returns dataframe
+  #   caculate corr between numerical variables and returns a dataframe
+  # 2 plots with required elements
+  
+  freq_table <- freq_table (data)
+  num_summary <- num_summary (data)
+  r_squared <- r_squared (data)
+  pearson_corr <- pearson_corr (data, threshold)
+  plotsBlue <- plotsNum (data, plotswitch, bins)
+  plotsGray <- plots_cat_or_bi (data, plotswitch)
+  
+  return (list(freq_table, num_summary, r_squared, pearson_corr, plotsBlue, plotsGray))
+  
+}
+
+
+# test
+data(diamonds)
+data<-data.frame(diamonds)
+explore(data, "grid", 0.5, c(30,60))
