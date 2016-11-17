@@ -1,6 +1,23 @@
 # Jack Zhong
 # Nov. 2016 
 
+##Prof G - explore and explore2 fail here.
+# > explore2(diamonds, 'grid', 0.3, c(10, 25, 50))
+# Hide Traceback
+# 
+# Rerun with Debug
+# Error in model.frame.default(formula = data[, i] ~ data[, j], drop.unused.levels = TRUE) : 
+#   invalid type (list) for variable 'data[, i]' 
+# 9 model.frame.default(formula = data[, i] ~ data[, j], drop.unused.levels = TRUE) 
+# 8 stats::model.frame(formula = data[, i] ~ data[, j], drop.unused.levels = TRUE) 
+# 7 eval(expr, envir, enclos) 
+# 6 eval(mf, parent.frame()) 
+# 5 lm(data[, i] ~ data[, j]) 
+# 4 summary(lm(data[, i] ~ data[, j])) at Zhong_Jack_explore2.R#43
+# 3 r_squared(data) at Zhong_Jack_explore2.R#256
+# 2 explore(data, plotswitch, threshold, bins) at Zhong_Jack_explore2.R#309
+# 1 explore2(diamonds, "grid", 0.3, c(10, 25, 50)) 
+# > 
 
 library(ggplot2)
 library(grid)
