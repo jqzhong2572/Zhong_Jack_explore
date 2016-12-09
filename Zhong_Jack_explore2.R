@@ -13,7 +13,7 @@ freq_table <- function(data) {
   # this function gives a frequency table for categorical and logical variable
   # Parameter: a dataframe
   # Returns: a frequency table
-  Cat_Or_Log <- c(data[sapply(data, is.factor)], data[sapply(data, is.logical)])
+  Cat_Or_Log <- c(data[,sapply(data, is.factor)], data[,sapply(data, is.logical)])
   return (lapply(Cat_Or_Log, table))
 }
 
@@ -34,10 +34,14 @@ r_squared <- function(data) {
   # Parameter: a dataframe
   # Returns: a new dataframe that contains each pair of column names and 
   # corresponding r-square value
+  data <- na.omit(data) # omit any na
   data <- data[sapply(data, is.numeric)] # only the numeric
   colname <- colnames(data) # extract column names
   pairwise_names <- c() # initiate pair of variables
   pairwise_r_squared <- c() # initiate the r_squared
+  if (ncol(data) <= 1){
+    new_data ='sorry we cannot count pairwise R spuare because of the number of numeric variables'
+  }else{
   for (i in 1:(length(colname)-1)) {
     for (j in (i+1):length(colname)) {
       temp <- summary(lm(data[,i]~data[,j]))$r.squared
@@ -50,6 +54,7 @@ r_squared <- function(data) {
   }
   new_data <- data.frame(pairwise_names, pairwise_r_squared)
   colnames(new_data) <- c("Variable Pairs", "R-squared")
+  }
   return (new_data)
 }  
 
@@ -59,7 +64,8 @@ pearson_corr <- function(data, threshold = 0) {
   #Parameter: a dataframe
   #Returns: a new dataframe that contains each pair of column names and corresponding 
   #pearson correlation coefficient
-  Num <- data[sapply(data, is.numeric)] # creates a variable that only has the numeric
+  data <- na.omit(data) # omit any na
+  Num <- data[,sapply(data, is.numeric)] # creates a variable that only has the numeric
   b <- combn(colnames(Num), 2) # finds all combinations of the name pairs
   pairs <- paste(b[1,], b[2, ], sep = "-") 
   # the column names are seperated by - using paste function
@@ -301,7 +307,7 @@ explore2 <- function(data,plotswitch="off", threshold=0.5, bins=NULL){
     }
     
     # round decimals
-    if (!is.integer(vector)) {        
+    if (!is.integer(bins)) {        
       bins <- round(bins)
     }
   }
@@ -310,6 +316,6 @@ explore2 <- function(data,plotswitch="off", threshold=0.5, bins=NULL){
 }
 
 # test
-explore2(diamonds,"osjfs",1.5)
+explore2(diamonds,"abcd",1.5)
 
 
