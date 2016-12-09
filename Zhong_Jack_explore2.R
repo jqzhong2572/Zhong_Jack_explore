@@ -13,9 +13,11 @@ freq_table <- function(data) {
   # this function gives a frequency table for categorical and logical variable
   # Parameter: a dataframe
   # Returns: a frequency table
-  Cat_Or_Log <- c(data[,sapply(data, is.factor)], data[,sapply(data, is.logical)])
-  return (lapply(Cat_Or_Log, table))
+  tb1 <- lapply(data.frame(data[,sapply(data,is.logical)]),table) #draw the table for logical variables
+  tb2 <- lapply(data.frame(data[,sapply(data,is.factor)]),table) #draw the table for factor variables
+  return(list(tb1,tb2))
 }
+
 
 
 
