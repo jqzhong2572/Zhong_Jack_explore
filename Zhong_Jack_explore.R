@@ -11,9 +11,11 @@ freq_table <- function(data) {
   # this function gives a frequency table for categorical and logical variable
   # Parameter: a dataframe
   # Returns: a frequency table
-  Cat_Or_Log <- c(data[sapply(data, is.factor)], data[sapply(data, is.logical)])
-  return (lapply(Cat_Or_Log, table))
+  tb1 <- lapply(data.frame(data[,sapply(data,is.logical)]),table) #draw the table for logical variables
+  tb2 <- lapply(data.frame(data[,sapply(data,is.factor)]),table) #draw the table for factor variables
+  return(list(tb1,tb2))
 }
+
 
 
 
@@ -32,39 +34,45 @@ r_squared <- function(data) {
   # Parameter: a dataframe
   # Returns: a new dataframe that contains each pair of column names and 
   # corresponding r-square value
+  data <- na.omit(data) # omit any na
   data <- data[sapply(data, is.numeric)] # only the numeric
   colname <- colnames(data) # extract column names
   pairwise_names <- c() # initiate pair of variables
   pairwise_r_squared <- c() # initiate the r_squared
-  for (i in 1:(length(colname)-1)) {
-    for (j in (i+1):length(colname)) {
-      temp <- summary(lm(data[,i]~data[,j]))$r.squared
+  if (ncol(data) <= 1){
+    new_data ='sorry we cannot count pairwise R spuare because of the number of numeric variables'
+  }else{
+    for (i in 1:(length(colname)-1)) {
+      for (j in (i+1):length(colname)) {
+        temp <- summary(lm(data[,i]~data[,j]))$r.squared
         # do linear model on the paired columns and get the r.squared number
-      pairwise_names <- c(pairwise_names, paste(colname[i], colname[j], sep="-"))
+        pairwise_names <- c(pairwise_names, paste(colname[i], colname[j], sep="-"))
         # add the new pairnames to the old list
-      pairwise_r_squared <- c(pairwise_r_squared, temp)
+        pairwise_r_squared <- c(pairwise_r_squared, temp)
         # add teh new r_squared number to the old list
+      }
     }
+    new_data <- data.frame(pairwise_names, pairwise_r_squared)
+    colnames(new_data) <- c("Variable Pairs", "R-squared")
   }
-  new_data <- data.frame(pairwise_names, pairwise_r_squared)
-  colnames(new_data) <- c("Variable Pairs", "R-squared")
   return (new_data)
 }  
-  
+
 
 pearson_corr <- function(data, threshold = 0) {
   # this function caculate corr and returns a dataframe
   #Parameter: a dataframe
   #Returns: a new dataframe that contains each pair of column names and corresponding 
   #pearson correlation coefficient
-  Num <- data[sapply(data, is.numeric)] # creates a variable that only has the numeric
+  data <- na.omit(data) # omit any na
+  Num <- data[,sapply(data, is.numeric)] # creates a variable that only has the numeric
   b <- combn(colnames(Num), 2) # finds all combinations of the name pairs
   pairs <- paste(b[1,], b[2, ], sep = "-") 
-     # the column names are seperated by - using paste function
+  # the column names are seperated by - using paste function
   c <- cor(Num, method = "pearson")
-     # finds the pearson correlation using the cor function
+  # finds the pearson correlation using the cor function
   correlation <- c[which(lower.tri(c))]  
-     # lower triangular matrix gets rid of dupilicates and 1's on the diagonal
+  # lower triangular matrix gets rid of dupilicates and 1's on the diagonal
   newdf <- data.frame(pairs, correlation) # create a new data frame with our pairs
   newdf <- subset(newdf, correlation > threshold) # apply the threshold
   colnames(newdf) <- c("Variable Pairs", "Pearson Exceeds Threshold")
@@ -166,7 +174,7 @@ plotsNum <- function(data,plotswitch='off',bins=NULL){
           ggtitle(paste(colnames(num[i]),"default bins",sep=" bins="))+
           xlab(colnames(num[i]))+
           geom_vline(xintercept = mean,col="red")
-           # draw the density histogram
+        # draw the density histogram
         grid.newpage()
         pushViewport(viewport(layout = grid.layout(2, 2, heights = unit(c(1, 8), "null"))))
         title <- paste(colnames(num[i]),"default bins",sep=" bins=")
@@ -221,19 +229,20 @@ is.binary <- function(v) {
 }
 
 plots_cat_or_bi <- function(data, plotswitch = "off") {
-  Cat_Or_Bi <- data[,sapply(data,is.factor)|sapply(data,is.binary)]
-    # pick out categorical and binary columns
+  data1 <- data[,sapply(data,is.factor)]
+  data2 <- data[,sapply(data,is.logical)]
+  data3 <- data[,sapply(data,is.binary)]
+  Cat_Or_Bi <- data.frame(data1,data2,data3)
+  # pick out categorical and binary columns
   if(plotswitch=="on"|plotswitch=="grid"){
     for(i in 1:ncol(Cat_Or_Bi)){
-      p <- ggplot(Cat_Or_Bi,aes(x=data[,i]),colour="gray")+
-        geom_bar()+ xlab(colnames(Cat_Or_Bi[i]))
+      p <- ggplot(Cat_Or_Bi,aes(x=data[,i]))+
+        geom_bar(fill='gray')+ xlab(colnames(Cat_Or_Bi[i]))
       # for each column, print a bar plot
       print(p)
     }
   }
 }
-
-
 
 explore <- function(data, plotswitch = "off", threshold = 0, bins = NULL) {
   # this is the main function
@@ -258,6 +267,7 @@ explore <- function(data, plotswitch = "off", threshold = 0, bins = NULL) {
   return (list(freq_table, num_summary, r_squared, pearson_corr, plotsBlue, plotsGray))
   
 }
+
 
 
 # test
