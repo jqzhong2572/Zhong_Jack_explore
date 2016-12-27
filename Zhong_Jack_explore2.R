@@ -48,7 +48,8 @@ r_squared <- function(data) {
 
   for (i in 1:(length(colname)-1)) {
     for (j in (i+1):length(colname)) {
-      temp <- summary(lm(data[,i]~data[,j]))$r.squared
+      ##Prof G - changed the following line
+      temp <- summary(lm(data[[i]]~data[[j]]))$r.squared
       # do linear model on the paired columns and get the r.squared number
       pairwise_names <- c(pairwise_names, paste(colname[i], colname[j], sep="-"))
       # add the new pairnames to the old list
@@ -235,6 +236,38 @@ is.binary <- function(v) {
   #check to see if x only contains 2 distinct values
 }
 
+##Prof G - Error being generated in the plot.
+##Prof G - Same problem as in generating the LM
+# Don't know how to automatically pick scale for object of type tbl_df/tbl/data.frame. Defaulting to continuous.
+# Don't know how to automatically pick scale for object of type tbl_df/tbl/data.frame. Defaulting to continuous.
+# Hide Traceback
+# 
+# Rerun with Debug
+# Error: Discrete value supplied to continuous scale 
+# 18 stop("Discrete value supplied to continuous scale", call. = FALSE) 
+# 17 scales::train_continuous(x, self$range) 
+# 16 f(..., self = self) 
+# 15 self$range$train(x) 
+# 14 f(..., self = self) 
+# 13 scales[[i]][[method]](data[[var]][scale_index[[i]]]) 
+# 12 FUN(X[[i]], ...) 
+# 11 lapply(seq_along(scales), function(i) {
+#   scales[[i]][[method]](data[[var]][scale_index[[i]]])
+# }) 
+# 10 FUN(X[[i]], ...) 
+# 9 lapply(vars, function(var) {
+#   pieces <- lapply(seq_along(scales), function(i) {
+#     scales[[i]][[method]](data[[var]][scale_index[[i]]])
+#   }) ... 
+#   8 scale_apply(layer_data, x_vars, "train", SCALE_X, panel$x_scales) 
+#   7 train_position(panel, data, scale_x(), scale_y()) 
+#   6 ggplot_build(x) 
+#   5 print.ggplot(p) 
+#   4 print(p) at Zhong_Jack_explore2.R#249
+#   3 plots_cat_or_bi(data, plotswitch) at Zhong_Jack_explore2.R#272
+#   2 explore(data, plotswitch, threshold, bins) at Zhong_Jack_explore2.R#323
+#   1 explore2(diamonds, "grid", 0.3, c(10, 25, 50)) 
+
 plots_cat_or_bi <- function(data, plotswitch = "off") {
   data1 <- data[,sapply(data,is.factor)]
   data2 <- data[,sapply(data,is.logical)]
@@ -243,7 +276,8 @@ plots_cat_or_bi <- function(data, plotswitch = "off") {
   # pick out categorical and binary columns
   if(plotswitch=="on"|plotswitch=="grid"){
     for(i in 1:ncol(Cat_Or_Bi)){
-      p <- ggplot(Cat_Or_Bi,aes(x=data[,i]))+
+      ##Prof G - changed the following line
+      p <- ggplot(Cat_Or_Bi,aes(x=data[[i]]))+
         geom_bar(fill='gray')+ xlab(colnames(Cat_Or_Bi[i]))
       # for each column, print a bar plot
       print(p)
@@ -325,7 +359,7 @@ explore2 <- function(data,plotswitch="off", threshold=0.5, bins=NULL){
 
 # test
 
-explore2(diamonds,"abcd",1.5)
+#explore2(diamonds,"abcd",1.5)
 
 
 
