@@ -1,24 +1,6 @@
 # Jack Zhong
 # Nov. 2016 
 
-##Prof G - explore and explore2 fail here.
-# > explore2(diamonds, 'grid', 0.3, c(10, 25, 50))
-# Hide Traceback
-# 
-# Rerun with Debug
-# Error in model.frame.default(formula = data[, i] ~ data[, j], drop.unused.levels = TRUE) : 
-#   invalid type (list) for variable 'data[, i]' 
-# 9 model.frame.default(formula = data[, i] ~ data[, j], drop.unused.levels = TRUE) 
-# 8 stats::model.frame(formula = data[, i] ~ data[, j], drop.unused.levels = TRUE) 
-# 7 eval(expr, envir, enclos) 
-# 6 eval(mf, parent.frame()) 
-# 5 lm(data[, i] ~ data[, j]) 
-# 4 summary(lm(data[, i] ~ data[, j])) at Zhong_Jack_explore2.R#43
-# 3 r_squared(data) at Zhong_Jack_explore2.R#256
-# 2 explore(data, plotswitch, threshold, bins) at Zhong_Jack_explore2.R#309
-# 1 explore2(diamonds, "grid", 0.3, c(10, 25, 50)) 
-# > 
-
 library(ggplot2)
 library(grid)
 # run the subfunctions first
@@ -30,10 +12,11 @@ freq_table <- function(data) {
   # this function gives a frequency table for categorical and logical variable
   # Parameter: a dataframe
   # Returns: a frequency table
-  Cat_Or_Log <- c(data[sapply(data, is.factor)], data[sapply(data, is.logical)])
-  return (lapply(Cat_Or_Log, table))
-}
 
+  tb1 <- lapply(data.frame(data[,sapply(data,is.logical)]),table) #draw the table for logical variables
+  tb2 <- lapply(data.frame(data[,sapply(data,is.factor)]),table) #draw the table for factor variables
+  return(list(tb1,tb2))
+}
 
 
 #2---------------------------------------------------------------------------
@@ -51,13 +34,22 @@ r_squared <- function(data) {
   # Parameter: a dataframe
   # Returns: a new dataframe that contains each pair of column names and 
   # corresponding r-square value
+
+  data <- na.omit(data) # omit any na
   data <- data[sapply(data, is.numeric)] # only the numeric
   colname <- colnames(data) # extract column names
   pairwise_names <- c() # initiate pair of variables
   pairwise_r_squared <- c() # initiate the r_squared
+
+  if (ncol(data) <= 1){
+    new_data ='sorry we cannot count pairwise R spuare because of the number of numeric variables'
+  }
+  else{
+
   for (i in 1:(length(colname)-1)) {
     for (j in (i+1):length(colname)) {
-      temp <- summary(lm(data[,i]~data[,j]))$r.squared
+      ##Prof G - changed the following line
+      temp <- summary(lm(data[[i]]~data[[j]]))$r.squared
       # do linear model on the paired columns and get the r.squared number
       pairwise_names <- c(pairwise_names, paste(colname[i], colname[j], sep="-"))
       # add the new pairnames to the old list
@@ -67,6 +59,8 @@ r_squared <- function(data) {
   }
   new_data <- data.frame(pairwise_names, pairwise_r_squared)
   colnames(new_data) <- c("Variable Pairs", "R-squared")
+
+  }
   return (new_data)
 }  
 
@@ -76,7 +70,10 @@ pearson_corr <- function(data, threshold = 0) {
   #Parameter: a dataframe
   #Returns: a new dataframe that contains each pair of column names and corresponding 
   #pearson correlation coefficient
-  Num <- data[sapply(data, is.numeric)] # creates a variable that only has the numeric
+
+  data <- na.omit(data) # omit any na
+  Num <- data[,sapply(data, is.numeric)] # creates a variable that only has the numeric
+  
   b <- combn(colnames(Num), 2) # finds all combinations of the name pairs
   pairs <- paste(b[1,], b[2, ], sep = "-") 
   # the column names are seperated by - using paste function
@@ -239,6 +236,38 @@ is.binary <- function(v) {
   #check to see if x only contains 2 distinct values
 }
 
+##Prof G - Error being generated in the plot.
+##Prof G - Same problem as in generating the LM
+# Don't know how to automatically pick scale for object of type tbl_df/tbl/data.frame. Defaulting to continuous.
+# Don't know how to automatically pick scale for object of type tbl_df/tbl/data.frame. Defaulting to continuous.
+# Hide Traceback
+# 
+# Rerun with Debug
+# Error: Discrete value supplied to continuous scale 
+# 18 stop("Discrete value supplied to continuous scale", call. = FALSE) 
+# 17 scales::train_continuous(x, self$range) 
+# 16 f(..., self = self) 
+# 15 self$range$train(x) 
+# 14 f(..., self = self) 
+# 13 scales[[i]][[method]](data[[var]][scale_index[[i]]]) 
+# 12 FUN(X[[i]], ...) 
+# 11 lapply(seq_along(scales), function(i) {
+#   scales[[i]][[method]](data[[var]][scale_index[[i]]])
+# }) 
+# 10 FUN(X[[i]], ...) 
+# 9 lapply(vars, function(var) {
+#   pieces <- lapply(seq_along(scales), function(i) {
+#     scales[[i]][[method]](data[[var]][scale_index[[i]]])
+#   }) ... 
+#   8 scale_apply(layer_data, x_vars, "train", SCALE_X, panel$x_scales) 
+#   7 train_position(panel, data, scale_x(), scale_y()) 
+#   6 ggplot_build(x) 
+#   5 print.ggplot(p) 
+#   4 print(p) at Zhong_Jack_explore2.R#249
+#   3 plots_cat_or_bi(data, plotswitch) at Zhong_Jack_explore2.R#272
+#   2 explore(data, plotswitch, threshold, bins) at Zhong_Jack_explore2.R#323
+#   1 explore2(diamonds, "grid", 0.3, c(10, 25, 50)) 
+
 plots_cat_or_bi <- function(data, plotswitch = "off") {
   data1 <- data[,sapply(data,is.factor)]
   data2 <- data[,sapply(data,is.logical)]
@@ -247,7 +276,8 @@ plots_cat_or_bi <- function(data, plotswitch = "off") {
   # pick out categorical and binary columns
   if(plotswitch=="on"|plotswitch=="grid"){
     for(i in 1:ncol(Cat_Or_Bi)){
-      p <- ggplot(Cat_Or_Bi,aes(x=data[,i]))+
+      ##Prof G - changed the following line
+      p <- ggplot(Cat_Or_Bi,aes(x=data[[i]]))+
         geom_bar(fill='gray')+ xlab(colnames(Cat_Or_Bi[i]))
       # for each column, print a bar plot
       print(p)
@@ -318,7 +348,8 @@ explore2 <- function(data,plotswitch="off", threshold=0.5, bins=NULL){
     }
     
     # round decimals
-    if (!is.integer(vector)) {        
+
+    if (!is.integer(bins)) {        
       bins <- round(bins)
     }
   }
@@ -327,6 +358,8 @@ explore2 <- function(data,plotswitch="off", threshold=0.5, bins=NULL){
 }
 
 # test
-explore2(diamonds,"osjfs",1.5)
+
+#explore2(diamonds,"abcd",1.5)
+
 
 
